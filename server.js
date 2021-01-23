@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 //Resources: Courses, Exams
 
 //endpoint to GET /courses                          (ottenere la lista di corsi)
-//Request body: eampy
+//Request body: empty
 //Responde body: Array of objects
 //Errors: none
  app.get('/courses', (req, res) => {
@@ -52,25 +52,24 @@ app.get('/', (req, res) => {
     
 }); 
 
-//  ''     to GET /courses/<course_code>            (ottenere corso da id)
+//endpoint to GET /courses/<course_code>            (ottenere corso da id)
+//Request body: course code
+//Responde body:object describing a course
+//Errors: if the course doesn't exist, return a message 404
 app.get('/courses/:code', (req, res) => { //definisco il parametro con ' : '
 const course_code = req.params.code; //prendo il parametro dall'URL
     //read from database
     const sql = 'SELECT * FROM course WHERE code = ?';
-    
-    db.get(sql, [course_code], (err, rows) => {  //fra parentesi quadre l'elenco dei parametri della query ' ? '
+    db.get(sql, [course_code], (err, row) => {  //fra parentesi quadre l'elenco dei parametri della query ' ? '
         if(err){
-            console.log(sql);
             throw err;
         }
-        console.log('aaaaa '+rows);
-        const courses = rows.map((row) => ({
-            code : row.code,
-            name : row.name,
-            CFU : row.CFU
-
-        }));
-        res.json(courses);
+        if(row)         { //se il dato esiste
+            res.json({code: row.code, name: row.name, CFU: row.CFU})
+        } else { //se il dato non esiste
+            res.status(404).json({reason : 'Course not found'});
+        }
+        
     })
     
 }); 
